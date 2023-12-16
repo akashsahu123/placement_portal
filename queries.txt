@@ -1,0 +1,139 @@
+DROP DATABASE IF EXISTS `placement_portal`;
+CREATE DATABASE `placement_portal`;
+USE `placement_portal`;
+
+CREATE TABLE `department` (
+	 id varchar(10) NOT NULL,
+	 name VARCHAR(50) NOT NULL , 
+	 PRIMARY KEY (id)
+ );
+
+CREATE TABLE graduation_type(
+	type varchar(3) NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE `course` ( 
+	`id` VARCHAR(10) NOT NULL , 
+	`name` VARCHAR(50) NOT NULL ,
+	`department_id` VARCHAR(50) NOT NULL ,
+	graduation_level varchar(3) NOT NULL,
+	PRIMARY KEY (`id`),
+	FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (graduation_level) REFERENCES graduation_type(type) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE student(
+    roll_no varchar(50)  NOT NULL,
+    name varchar(50) NOT NULL,
+    tenth_percentage double NOT NULL,
+	twelth_percentage double NOT NULL,
+    ug_cpi double  NOT NULL,
+	pg_cpi double,
+	phd_cpi double,
+    course varchar(10) NOT NULL,
+    email varchar(50) NOT NULL,
+    password varchar(100) NOT NULL,
+    is_verified TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY(roll_no),
+    FOREIGN KEY (course) REFERENCES course(id) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE resume(
+    roll_no varchar(10) NOT NULL,
+    resume_no TINYINT UNSIGNED NOT NULL,
+    is_verified tinyint unsigned NOT NULL DEFAULT 0,
+    link varchar(150) NOT NULL,
+    PRIMARY KEY(roll_no, resume_no),
+    FOREIGN KEY (roll_no) REFERENCES student(roll_no) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE company(
+    id varchar(10) NOT NULL,
+    name varchar(50) NOT NULL,
+    email varchar(50) NOT NULL,
+    password varchar(100) NOT NULL,
+    is_verified TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY key(id)
+);
+
+CREATE TABLE admin(
+    id varchar(10) NOT NULL,
+    name varchar(50) NOT NULL,
+    email varchar(50) NOT NULL,
+    password varchar(120) NOT NULL,
+    PRIMARY key(id)
+);
+
+CREATE TABLE job_role(
+	company_id varchar(10) NOT NULL,
+	title varchar(50) NOT NULL,
+	salary INT NOT NULL,
+	num_vacancies INT,
+	tenth_percentage double,
+	twelth_percentage double,
+	ug_cpi double,
+	pg_cpi double,
+	phd_cpi double,
+	link varchar(50),
+	deadline date NOT NULL,
+	PRIMARY KEY(company_id,title),
+	FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE job_apply(
+	company_id varchar(10) NOT NULL,
+	job_title varchar(50) NOT NULL,
+	roll_no varchar(10) NOT NULL,
+	resume_no TINYINT UNSIGNED NOT NULL,
+	primary key(company_id,job_title,roll_no),
+	FOREIGN KEY (company_id,job_title) REFERENCES job_role(company_id,title) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (roll_no,resume_no) REFERENCES resume(roll_no,resume_no) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE job_offer(
+	company_id varchar(10) NOT NULL,
+	job_title varchar(50) NOT NULL,
+	roll_no varchar(10) NOT NULL,
+	is_accepted tinyint,
+	primary key(company_id,job_title,roll_no),
+	FOREIGN KEY (roll_no) REFERENCES student(roll_no) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (company_id,job_title) REFERENCES job_role(company_id,title) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE allowed_courses(
+	company_id varchar(10) NOT NULL,
+	job_title varchar(50) NOT NULL,
+	course_id varchar(10) NOT NULL,
+	primary key(company_id,job_title,course_id),
+	FOREIGN KEY (company_id,job_title) REFERENCES job_role(company_id,title) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (course_id) REFERENCES course(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE event_timings 
+( 
+    name VARCHAR(50) NOT NULL , 
+    start_time DATETIME  NOT NULL,
+    end_time DATETIME  NOT NULL,
+    PRIMARY KEY (name)
+);
+
+INSERT INTO department VALUES('MA','Mathemetics'),('PHY','Physics'),('CHY','Chemistry'),('EEE','Electronics and Electrical Engineering'),('BTC','Biotechnology'),('CVL','Civil Engineering'),('ME','Mechanical Engineering'),('CSE','Computer Science and Engineering');
+
+INSERT INTO `graduation_type` (`type`) VALUES ('ug'), ('pg'), ('phd');
+
+INSERT INTO `course` (`id`, `name`, `department_id`, `graduation_level`) VALUES ('BTECHCSE', 'BTech Computer Science and Engineering', 'CSE', 'ug'), ('BTECHEEE', 'BTech Electronics and Electrical Engineering', 'EEE', 'ug'), ('BTECHCE', 'BTech Civil Engineering', 'CVL', 'ug'), ('BTECHME', 'BTech Mechanical Engineering', 'ME', 'ug'), ('MTECHCSE', 'MTech Computer Science and Engineering', 'CSE', 'pg'), ('MSCPHY', 'MSc Physics', 'PHY', 'pg'), ('MSCCHY', 'MSc Chemistry', 'CHY', 'pg'), ('PHDMTH', 'Phd Mathematics', 'MA', 'phd'), ('PHDCS', 'Phd Computer Science', 'CSE', 'phd'), ('PHDPHY', 'Phd Physics', 'PHY', 'phd'),('MSCMNC', 'MSc Mathematics and Computing', 'MA', 'pg');
+
+INSERT INTO `student` (`roll_no`, `name`, `tenth_percentage`, `twelth_percentage`, `ug_cpi`, `pg_cpi`, `phd_cpi`, `course`, `email`, `password`) VALUES ('212123005', 'Akash Sahu', '94.5', '94', '8.4', '8.5', NULL, 'MSCMNC', 'akashsahu@iitr.ac.in', '$2y$10$hQGUwfaB2au7JMjkZVbNyej/h38O0IqUN9rLshvAxRDpC6nu4qPyW'), ('1', 'Mohit Sharma', '100', '40', '10', NULL, NULL, 'BTECHCSE', 'mohitsharma@iitr.ac.in', '$2y$10$hQGUwfaB2au7JMjkZVbNyej/h38O0IqUN9rLshvAxRDpC6nu4qPyW'), ('2', 'Test One', '94', '45', '6', '6', NULL, 'MTECHCSE', 'testone@iitr.ac.in', '$2y$10$hQGUwfaB2au7JMjkZVbNyej/h38O0IqUN9rLshvAxRDpC6nu4qPyW'), ('3', 'Chrys gale', '45', '56', '6', '7', '8', 'PHDPHY', 'chrysgale@iitr.ac.in', '$2y$10$hQGUwfaB2au7JMjkZVbNyej/h38O0IqUN9rLshvAxRDpC6nu4qPyW');
+
+INSERT INTO `company` (`id`, `name`, `email`, `password`, `is_verified`) VALUES ('1', 'Rakuten', 'rakuten@gmail.com', '$2y$10$hQGUwfaB2au7JMjkZVbNyej/h38O0IqUN9rLshvAxRDpC6nu4qPyW', '1');
+
+INSERT INTO `admin` (`id`, `name`, `email`, `password`) VALUES ('1', 'Admin', 'admin@gmail.com', '$2y$10$hQGUwfaB2au7JMjkZVbNyej/h38O0IqUN9rLshvAxRDpC6nu4qPyW');
+
+INSERT INTO `event_timings` (`name`, `start_time`, `end_time`) VALUES ('Update Resume', '1000-01-01 00:00:00', '9999-12-31 23:59:59'), ('Apply for Jobs', '1000-01-01 00:00:00', '9999-12-31 23:59:59'), ('Accept Offer', '1000-01-01 00:00:00', '9999-12-31 23:59:59'), ('Edit Job Profile', '1000-01-01 00:00:00', '9999-12-31 23:59:59'), ('Give Offer', '1000-01-01 00:00:00', '9999-12-31 23:59:59'); 
+
+
+
+
+
+	

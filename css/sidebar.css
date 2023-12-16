@@ -1,0 +1,22 @@
+ul.nav>*>*:not([class~='active']):hover {
+    background-color: #eee;
+}
+
+#sidebar {
+    transition: left 0.2s linear;
+}
+
+svg {
+    position: relative;
+    top: -2px;
+}
+
+@media only screen and (max-width: 768px) {
+    #sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        z-index: 5;
+    }
+}
